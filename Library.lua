@@ -216,6 +216,11 @@ local function ApplySeed(pos)
     return Vector3.new(pos.X + ox, pos.Y + oy, pos.Z + oz)
 end
 
+-- // jitter (per-session timing variance)
+local function SeedJitter(maxMs)
+    return (NextSeed() % (maxMs + 1)) * 0.001
+end
+
 -- // load & save
 local function SaveSettings()
     local DataToSave = {}
@@ -2214,6 +2219,7 @@ end
 
 -- // voting & map selection
 local function RunVoteSkip()
+    task.wait(SeedJitter(30))
     while true do
         local success = pcall(function()
             RemoteFunc:InvokeServer("Voting", "Skip")
@@ -2452,6 +2458,7 @@ end
 
 local function DoUpgradeTower(TObj, PathId)
     while true do
+        task.wait(SeedJitter(40))
         local ok, res = pcall(function()
             return RemoteFunc:InvokeServer("Troops", "Upgrade", "Set", {
                 Troop = TObj,
@@ -2465,6 +2472,7 @@ end
 
 local function DoSellTower(TObj)
     while true do
+        task.wait(SeedJitter(40))
         local ok, res = pcall(function()
             return RemoteFunc:InvokeServer("Troops", "Sell", { Troop = TObj })
         end)
@@ -2479,6 +2487,7 @@ local function DoSetOption(TObj, OptName, OptVal, ReqWave)
     end
 
     while true do
+        task.wait(SeedJitter(40))
         local ok, res = pcall(function()
             return RemoteFunc:InvokeServer("Troops", "Option", "Set", {
                 Troop = TObj,
@@ -2891,12 +2900,12 @@ function TDS:AutoChain(...)
 
             if timescale then
                 if timescale:FindFirstChild("Lock") then
-                    task.wait(10.5)
+                    task.wait(10.5 + SeedJitter(500))
                 else
-                    task.wait(5.5)
+                    task.wait(5.5 + SeedJitter(500))
                 end
             else
-                task.wait(10.5)
+                task.wait(10.5 + SeedJitter(500))
             end
 
             i += 1
@@ -3202,12 +3211,12 @@ local function StartAutoChain()
                     
                     if TimescaleFrame and TimescaleFrame.Visible then
                         if TimescaleFrame:FindFirstChild("Lock") then
-                            task.wait(10.3)
+                            task.wait(10.3 + SeedJitter(500))
                         else
-                            task.wait(5.25)
+                            task.wait(5.25 + SeedJitter(500))
                         end
                     else
-                        task.wait(10.3)
+                        task.wait(10.3 + SeedJitter(500))
                     end
                 else
                     task.wait(0.5)
@@ -3249,7 +3258,7 @@ local function StartAutoDjBooth()
                 )
             end
 
-            task.wait(1)
+            task.wait(1 + SeedJitter(200))
         end
 
         AutoDjRunning = false
@@ -3415,14 +3424,14 @@ local function StartAutoMercenary()
                             }
                         )
 
-                        task.wait(0.5)
+                        task.wait(0.5 + SeedJitter(100))
                         
                         if not Globals.AutoMercenary then break end
                     end
                 end
             end
 
-            task.wait(0.5)
+            task.wait(0.5 + SeedJitter(100))
         end
 
         AutoMercenaryBaseRunning = false
@@ -3460,14 +3469,14 @@ local function StartAutoMilitary()
                             }
                         )
 
-                        task.wait(0.5)
+                        task.wait(0.5 + SeedJitter(100))
                         
                         if not Globals.AutoMilitary then break end
                     end
                 end
             end
 
-            task.wait(0.5)
+            task.wait(0.5 + SeedJitter(100))
         end
         
         AutoMilitaryBaseRunning = false
