@@ -216,7 +216,7 @@ local function ApplySeed(pos)
     return Vector3.new(pos.X + ox, pos.Y + oy, pos.Z + oz)
 end
 
--- // jitter (per-session timing variance)
+-- // jitter (per-session timing variance) 
 local function SeedJitter(maxMs)
     return (NextSeed() % (maxMs + 1)) * 0.001
 end
@@ -2219,7 +2219,7 @@ end
 
 -- // voting & map selection
 local function RunVoteSkip()
-    task.wait(SeedJitter(30))
+    task.wait(SeedJitter(10))
     while true do
         local success = pcall(function()
             RemoteFunc:InvokeServer("Voting", "Skip")
@@ -2458,7 +2458,7 @@ end
 
 local function DoUpgradeTower(TObj, PathId)
     while true do
-        task.wait(SeedJitter(40))
+        task.wait(SeedJitter(10))
         local ok, res = pcall(function()
             return RemoteFunc:InvokeServer("Troops", "Upgrade", "Set", {
                 Troop = TObj,
@@ -2472,7 +2472,7 @@ end
 
 local function DoSellTower(TObj)
     while true do
-        task.wait(SeedJitter(40))
+        task.wait(SeedJitter(10))
         local ok, res = pcall(function()
             return RemoteFunc:InvokeServer("Troops", "Sell", { Troop = TObj })
         end)
@@ -2487,7 +2487,7 @@ local function DoSetOption(TObj, OptName, OptVal, ReqWave)
     end
 
     while true do
-        task.wait(SeedJitter(40))
+        task.wait(SeedJitter(10))
         local ok, res = pcall(function()
             return RemoteFunc:InvokeServer("Troops", "Option", "Set", {
                 Troop = TObj,
