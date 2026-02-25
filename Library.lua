@@ -221,6 +221,28 @@ local function SeedJitter(maxMs)
     return (NextSeed() % (maxMs + 1)) * 0.001
 end
 
+-- // evasion helpers
+local function TryElevate()
+    pcall(setidentity, 8)
+end
+
+local function WrapCall(fn)
+    if newcclosure then
+        return newcclosure(fn)
+    end
+    return fn
+end
+
+local function SeedRotation()
+    return CFrame.Angles(0, (NextSeed() % 314) * 0.00001, 0) -- max ~0.003 rad (~0.18 deg)
+end
+
+local function SeedData(tbl)
+    tbl = tbl or {}
+    tbl._s = NextSeed() % 255
+    return tbl
+end
+
 -- // load & save
 local function SaveSettings()
     local DataToSave = {}
@@ -2444,12 +2466,13 @@ end
 local function DoPlaceTower(TName, TPos)
     Logger:Log("Placing tower: " .. TName)
     while true do
-        local ok, res = pcall(function()
+        TryElevate()
+        local ok, res = pcall(WrapCall(function()
             return RemoteFunc:InvokeServer("Troops", "Pl\208\176ce", {
-                Rotation = CFrame.new(),
+                Rotation = SeedRotation(),
                 Position = ApplySeed(TPos)
             }, TName)
-        end)
+        end))
 
         if ok and CheckResOk(res) then return true end
         task.wait(0.25)
@@ -2459,12 +2482,13 @@ end
 local function DoUpgradeTower(TObj, PathId)
     while true do
         task.wait(SeedJitter(10))
-        local ok, res = pcall(function()
+        TryElevate()
+        local ok, res = pcall(WrapCall(function()
             return RemoteFunc:InvokeServer("Troops", "Upgrade", "Set", {
                 Troop = TObj,
                 Path = PathId
             })
-        end)
+        end))
         if ok and CheckResOk(res) then return true end
         task.wait(0.25)
     end
@@ -2473,9 +2497,10 @@ end
 local function DoSellTower(TObj)
     while true do
         task.wait(SeedJitter(10))
-        local ok, res = pcall(function()
+        TryElevate()
+        local ok, res = pcall(WrapCall(function()
             return RemoteFunc:InvokeServer("Troops", "Sell", { Troop = TObj })
-        end)
+        end))
         if ok and CheckResOk(res) then return true end
         task.wait(0.25)
     end
@@ -2488,13 +2513,14 @@ local function DoSetOption(TObj, OptName, OptVal, ReqWave)
 
     while true do
         task.wait(SeedJitter(10))
-        local ok, res = pcall(function()
+        TryElevate()
+        local ok, res = pcall(WrapCall(function()
             return RemoteFunc:InvokeServer("Troops", "Option", "Set", {
                 Troop = TObj,
                 Name = OptName,
                 Value = OptVal
             })
-        end)
+        end))
         if ok and CheckResOk(res) then return true end
         task.wait(0.25)
     end
@@ -3191,7 +3217,7 @@ local function StartAutoChain()
                         "Troops",
                         "Abilities",
                         "Activate",
-                        { Troop = CurrentCommander, Name = "Support Caravan", Data = {} }
+                        { Troop = CurrentCommander, Name = "Support Caravan", Data = SeedData() }
                     )
                     task.wait(0.1) 
                 end
@@ -3200,7 +3226,7 @@ local function StartAutoChain()
                     "Troops",
                     "Abilities",
                     "Activate",
-                    { Troop = CurrentCommander, Name = "Call Of Arms", Data = {} }
+                    { Troop = CurrentCommander, Name = "Call Of Arms", Data = SeedData() }
                 )
 
                 if response then
@@ -3254,7 +3280,7 @@ local function StartAutoDjBooth()
                     "Troops",
                     "Abilities",
                     "Activate",
-                    { Troop = DJ, Name = "Drop The Beat", Data = {} }
+                    { Troop = DJ, Name = "Drop The Beat", Data = SeedData() }
                 )
             end
 
@@ -3370,7 +3396,7 @@ local function StartAutoNecro()
                         "Troops",
                         "Abilities",
                         "Activate",
-                        { Troop = CurrentNecromancer, Name = "Raise The Dead", Data = {} }
+                        { Troop = CurrentNecromancer, Name = "Raise The Dead", Data = SeedData() }
                     )
                     
                     if response then 
