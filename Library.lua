@@ -2054,11 +2054,15 @@ local function GetAllRewards()
         results.Level = LevelValue.Value or 0
     end
 
-    local label = PlayerGui:WaitForChild("ReactGameTopGameDisplay").Frame.wave.container.value
-    local WaveNum = label.Text:match("^(%d+)")
-
-    if WaveNum then
-        results.Wave = tonumber(WaveNum) or 0
+    local _topDisplay = PlayerGui:WaitForChild("ReactGameTopGameDisplay", 1)
+    local _label = _topDisplay
+        and _topDisplay:FindFirstChild("Frame")
+        and _topDisplay.Frame:FindFirstChild("wave")
+        and _topDisplay.Frame.wave:FindFirstChild("container")
+        and _topDisplay.Frame.wave.container:FindFirstChild("value")
+    if _label then
+        local WaveNum = _label.Text:match("^(%d+)")
+        if WaveNum then results.Wave = tonumber(WaveNum) or 0 end
     end
 
     local SectionRewards = RewardsScreen and RewardsScreen:FindFirstChild("RewardsSection")
